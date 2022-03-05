@@ -1,0 +1,28 @@
+version: "3.9"
+services:
+  pgchainlink:
+    image: postgres:13-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: chainlink
+      POSTGRES_USER: chainlink
+      POSTGRES_PASSWORD: chainlink
+
+  chainlink-avalanche-node:
+    image: smartcontract/chainlink:1.1.1
+    restart: on-failure
+    ports:
+      - "6688:6688"
+    volumes:
+      - ./config/chainlink:/chainlink
+    entrypoint: "chainlink local n -p /chainlink/.password -a /chainlink/.api"
+    env_file:
+      - .env
+    depends_on:
+      - pgchainlink
+
+  api:
+    build: ./api
+    ports:
+      - "8000:8000"
